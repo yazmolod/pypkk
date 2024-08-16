@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pypkk"
+description = "The next generation HTTP client."
+license = "BSD-3-Clause"
+requires-python = ">=3.12"
+authors = [
+    { name = "Aleksandr Litovchenko", email = "yazmolod@gmail.com" },
+]
+dependencies = [
+    "httpx",
+    "pydantic",
+    "pydantic-geojson",
+    "opencv-python",
+    "shapely",
+    "pyproj",
+    "numpy",
+]
+dynamic = ["readme", "version"]
+
+[tool.hatch.version]
+path = "pypkk/__version__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/httpx",
+    "/README.md",
+    "/tests",
+]
