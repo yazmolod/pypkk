@@ -50,6 +50,14 @@ def api_request(req_method: str, api_method: str, params: Optional[dict] = None,
         r = client.request(req_method, API_HOST + api_method,
                            params=params, json=json).raise_for_status()
         return r.json()
+    
+    
+async def async_api_request(req_method: str, api_method: str, params: Optional[dict] = None, json: Optional[dict] = None):
+    async with async_httpx_client() as client:
+        r = await client.request(req_method, API_HOST + api_method,
+                           params=params, json=json)
+        r.raise_for_status()
+        return r.json()
 
 
 def generate_tile_params(feature: PkkSearchFeature, tile_extent: PkkExtent):

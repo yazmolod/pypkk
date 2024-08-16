@@ -40,7 +40,7 @@ class PkkAttrs(BaseModel):
 
 class PkkSearchFeature(BaseModel):
     attrs: PkkAttrs
-    sort: int
+    sort: Optional[int] = None
     type: PkkType
     center: Optional[PkkCenter] = None
     extent: Optional[PkkExtent] = None

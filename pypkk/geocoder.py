@@ -3,7 +3,7 @@ from typing import Optional
 import time
 from shapely.geometry import mapping
 
-from .requests import api_request, tile_request, async_httpx_client
+from .requests import api_request, tile_request, async_httpx_client, async_api_request
 from .models import Cn, PkkType, PkkAtPointResponse, PkkFeature, PkkFeatureResponse, PkkSearchFeature, PkkExtent, PkkTileResponse, PkkGeojson
 from .utils import generate_tile_extents
 from .image import get_geometry
@@ -39,6 +39,15 @@ def get_attrs(cn: Cn) -> PkkFeatureResponse:
         '_': round(time.time() * 1000),
     }
     r = api_request('get', f'/features/{cn.kind}/{cn.clean_code}', params=params)
+    return PkkFeatureResponse.model_validate(r)
+
+
+async def async_get_attrs(cn: Cn) -> PkkFeatureResponse:
+    params = {
+        'date_format': r'%c',
+        '_': round(time.time() * 1000),
+    }
+    r = await async_api_request('get', f'/features/{cn.kind}/{cn.clean_code}', params=params)
     return PkkFeatureResponse.model_validate(r)
 
 
