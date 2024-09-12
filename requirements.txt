@@ -27,7 +27,6 @@ pydantic-geojson==0.1.1
 pydantic_core==2.20.1
 pylint==3.2.6
 pyogrio==0.9.0
--e git+https://github.com/yazmolod/pypkk.git@c3056ed8b6c5aaf9adfd285ffee2aad00fb231b4#egg=pypkk
 pyproj==3.6.1
 pytest==8.3.2
 pytest-asyncio==0.23.8
