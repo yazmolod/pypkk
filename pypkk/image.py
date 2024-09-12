@@ -77,7 +77,7 @@ def get_image_geometry(tile_data: PkkTileResponse):
     return to_geom(image_xy_corner)
 
 
-def get_geometry(tiles_data: list[PkkTileResponse]) -> MultiPolygon:
+def extract_geometry_from_tiles(tiles_data: list[PkkTileResponse]) -> MultiPolygon:
     geoms = []
     for i in tiles_data:
         geom = get_image_geometry(i)
