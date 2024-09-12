@@ -5,7 +5,7 @@ from time import sleep
 import httpx
 
 from .models import PkkExtent, PkkType, PkkSearchFeature, PkkTileResponse
-from .utils import DEFAULT_SCALE, PKK_MAX_TILE_SIZE
+from .tile_utils import DEFAULT_SCALE, PKK_MAX_TILE_SIZE
 
 API_HOST = 'https://pkk.rosreestr.ru/api'
 SELECTED_TILE_HOST = 'https://pkk.rosreestr.ru/arcgis/rest/services/PKK6/CadastreSelected/MapServer/export'

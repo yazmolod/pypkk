@@ -6,8 +6,8 @@ import httpx
 from shapely.geometry import mapping
 
 from .requests import api_request, async_api_request, tile_request, async_tile_request, CLIENT_ARGS
-from .models import Cn, PkkType, PkkAtPointResponse, PkkFeature, PkkFeatureResponse, PkkSearchFeature, PkkExtent, PkkTileResponse, PkkGeojson
-from .utils import generate_tile_extents
+from .models import Cn, PkkType, PkkAtPointResponse, PkkFeature, PkkFeatureResponse, PkkSearchFeature, PkkGeojson
+from .tile_utils import generate_tile_extents
 from .image import extract_geometry_from_tiles
 
 

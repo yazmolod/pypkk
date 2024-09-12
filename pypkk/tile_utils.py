@@ -1,6 +1,5 @@
 from typing import Optional
-
-from .models import PkkExtent, PkkTileResponse
+from .models import PkkExtent
 
 
 # ~scale=375 в ответе с пкк; достаточный масштаб для определение выступа контура меньше метра
@@ -20,8 +19,8 @@ API_TIMEOUT = 1000
 
 
 def generate_tile_extents(
-    extent: PkkExtent, 
-    custom_extent: Optional[PkkExtent] = None, 
+    extent: PkkExtent,
+    custom_extent: Optional[PkkExtent] = None,
     scale: Optional[int] = None) -> list[PkkExtent]:
     # if custom_extent is not None:
     #     input_extent.xmin = max([input_extent.xmin, custom_extent.xmin])
@@ -54,24 +53,3 @@ def generate_tile_extents(
     if len(extents) > MAX_SUBTILES_PER_CN and scale > 1:
         return generate_tile_extents(extent, custom_extent, scale - 1)
     return extents
-
-
-def decode_tile(data: PkkTileResponse):
-    data = request.json
-    image_path = TEMP_FOLDER / (str(uuid.uuid4()) + '.png')
-    with open(image_path, 'wb') as file:
-        bytes = base64.b64decode(data['imageData'])
-        file.write(bytes)
-    area = Area()
-    area.image_path = str(image_path)
-    area.image_extent = data['extent']
-    with Image.open(str(image_path)) as img:
-        area.width = img.width
-        area.height = img.height
-    area.xy = area.get_image_geometry()
-    image_path.unlink()
-    if area.xy:
-        geojson = json.loads(area.to_geojson_poly())
-        return geojson, 200
-    else:
-        return {'type': 'Feature', 'geometry': {'type': 'MultiPolygon', 'coordinates': None}}, 200

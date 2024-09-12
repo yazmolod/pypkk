@@ -1,6 +1,5 @@
 import pytest
 import geopandas as gpd
-import json
 
 from pypkk import Cn, PKK, AsyncPKK
 
@@ -29,6 +28,8 @@ def test_get_attrs(simple_cn):
     with PKK() as api:
         data = api.get_attrs(simple_cn)
         assert data is not None
+        assert data.feature is not None
+        assert not data.feature.shapely_geometry.is_empty
 
 
 @pytest.mark.asyncio
@@ -36,18 +37,20 @@ async def test_async_get_attrs(simple_cn):
     async with AsyncPKK() as api:
         data = await api.get_attrs(simple_cn)
         assert data is not None
+        assert data.feature is not None
+        assert not data.feature.shapely_geometry.is_empty
 
 
 def test_search_at_point():
     with PKK() as api:
-        data = api.search_at_point(37.58525569633632, 55.74811840108685, [1, 5])
+        data = api.search_at_point(37.255265, 55.9766957, [1, 5])
         assert data is not None
 
 
 @pytest.mark.asyncio
 async def test_async_search_at_point():
     async with AsyncPKK() as api:
-        data = await api.search_at_point(37.58525569633632, 55.74811840108685, [1, 5])
+        data = await api.search_at_point(37.255265, 55.9766957, [1, 5])
         assert data is not None
 
 

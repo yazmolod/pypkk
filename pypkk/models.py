@@ -3,7 +3,10 @@ from typing import Literal, Annotated, Optional, Any
 from pydantic import BaseModel, StringConstraints, ConfigDict, Base64Bytes
 from pydantic.alias_generators import to_camel
 from pydantic_geojson import FeatureModel, MultiPolygonModel
-from shapely.geometry import shape
+from shapely.geometry import shape, Point
+
+from .geom_utils import to_4326
+
 
 PkkType = Literal[1, 5]
 
@@ -44,6 +47,12 @@ class PkkSearchFeature(BaseModel):
     type: PkkType
     center: Optional[PkkCenter] = None
     extent: Optional[PkkExtent] = None
+    
+    @property
+    def shapely_geometry(self):
+        if self.center is None:
+            return Point()
+        return to_4326(Point(self.center.x, self.center.y))
 
 
 class PkkFeature(PkkSearchFeature):

@@ -1,27 +1,22 @@
 from io import BytesIO
+from typing import Optional
 
 import cv2
 import numpy as np
 from shapely.geometry import LineString, Polygon, MultiPolygon
-from shapely.geometry.base import BaseGeometry
-import pyproj
-from shapely.ops import transform, unary_union
+
+from shapely.ops import unary_union
 from shapely.validation import make_valid
 
-from .models import PkkTileResponse, PkkExtent
-
-
-EPSG_3857 = pyproj.CRS('epsg:3857')
-EPSG_4326 = pyproj.CRS('epsg:4326')
-TRANSFORM_3857_4326 = pyproj.Transformer.from_crs(
-    EPSG_3857, EPSG_4326, always_xy=True).transform
+from .models import PkkTileResponse
+from .geom_utils import to_4326
 
 
 class NoContoursError(Exception):
     pass
 
 
-def get_image_xy_corner(stream):
+def _get_image_xy_corner(stream: BytesIO):
     """get сartesian coordinates from raster"""
     image_xy_corners = []
     bytes = bytearray(stream.read())
@@ -61,8 +56,8 @@ def get_image_xy_corner(stream):
     return image_xy_corners
 
 
-def get_image_geometry(tile_data: PkkTileResponse):
-    image_xy_corner = get_image_xy_corner(BytesIO(tile_data.image_data))
+def get_image_geometry(tile_data: PkkTileResponse) -> Optional[MultiPolygon]:
+    image_xy_corner = _get_image_xy_corner(BytesIO(tile_data.image_data))
     if image_xy_corner is None:
         return None
     dx = (tile_data.extent.xmax - tile_data.extent.xmin) / tile_data.width
@@ -92,14 +87,10 @@ def extract_geometry_from_tiles(tiles_data: list[PkkTileResponse]) -> MultiPolyg
     return merged
 
 
-def to_geom(xy):
+def to_geom(xy) -> MultiPolygon:
     polys = []
     for g in xy:
         shell = LineString(g[0])
         holes = [LineString(i) for i in g[1:]] or None
         polys.append(Polygon(shell, holes))
     return make_valid(to_4326(MultiPolygon(polys)))
-
-
-def to_4326(geom: BaseGeometry):
-    return transform(TRANSFORM_3857_4326, geom)
