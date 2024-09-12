@@ -1,8 +1,9 @@
 import asyncio
-from typing import Optional
+from typing import Optional, Literal
 import time
 
 import httpx
+import hishel
 from shapely.geometry import mapping
 
 from .requests import api_request, async_api_request, tile_request, async_tile_request, CLIENT_ARGS
@@ -12,7 +13,11 @@ from .image import extract_geometry_from_tiles
 
 
 tolerance = 4
-
+_hishel_controller = hishel.Controller(
+    allow_stale=True,
+    force_cache=True,
+    cacheable_status_codes=[200],
+)
 
 class NoCoordsFeatureError(Exception):
     def __init__(self, feature: PkkSearchFeature):
@@ -20,9 +25,20 @@ class NoCoordsFeatureError(Exception):
 
 
 class PKK:
-    def __init__(self, use_cache: bool = True):
-        self._client = httpx.Client(**CLIENT_ARGS)
-        self._use_cache = use_cache
+    def __init__(
+        self,
+        cache_type: Optional[Literal['sqlite']] = 'sqlite',
+        cache_ttl: int = 24*60*60
+    ):
+        transport = None
+        match cache_type:
+            case 'sqlite':
+                transport = hishel.CacheTransport(
+                    transport=httpx.HTTPTransport(verify=False),
+                    storage=hishel.SQLiteStorage(ttl=cache_ttl),
+                    controller=_hishel_controller,
+                )
+        self._client = httpx.Client(**CLIENT_ARGS, transport=transport)
 
     def __enter__(self):
         return self
@@ -37,7 +53,6 @@ class PKK:
         types: Optional[list[PkkType]] = None
     ) -> PkkAtPointResponse:
         params = {
-            '_': round(time.time() * 1000),
             'tolerance': tolerance,
             'text': f'{lat} {lng}',
         }
@@ -55,7 +70,6 @@ class PKK:
     def get_attrs(self, cn: Cn) -> PkkFeatureResponse:
         params = {
             'date_format': r'%c',
-            '_': round(time.time() * 1000),
         }
         r = api_request(
             self._client,
@@ -69,9 +83,20 @@ class PKK:
 
 
 class AsyncPKK:
-    def __init__(self, use_cache: bool = True):
-        self._client = httpx.AsyncClient(**CLIENT_ARGS)
-        self._use_cache = use_cache
+    def __init__(
+        self,
+        cache_type: Optional[Literal['sqlite']] = 'sqlite',
+        cache_ttl: int = 24*60*60
+    ):
+        transport = None
+        match cache_type:
+            case 'sqlite':
+                transport = hishel.AsyncCacheTransport(
+                    transport=httpx.AsyncHTTPTransport(verify=False),
+                    storage=hishel.AsyncSQLiteStorage(ttl=cache_ttl),
+                    controller=_hishel_controller,
+                )
+        self._client = httpx.AsyncClient(**CLIENT_ARGS, transport=transport)
 
     async def __aenter__(self):
         return self
@@ -86,7 +111,6 @@ class AsyncPKK:
         types: Optional[list[PkkType]] = None
     ) -> PkkAtPointResponse:
         params = {
-            '_': round(time.time() * 1000),
             'tolerance': tolerance,
             'text': f'{lat} {lng}',
         }
@@ -104,7 +128,6 @@ class AsyncPKK:
     async def get_attrs(self, cn: Cn) -> PkkFeatureResponse:
         params = {
             'date_format': r'%c',
-            '_': round(time.time() * 1000),
         }
         r = await async_api_request(
             self._client,

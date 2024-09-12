@@ -18,7 +18,6 @@ CLIENT_ARGS = {
         'x-requested-with': 'XMLHttpRequest',
     },
     "timeout": 10,
-    "verify": False,
 }
 
 TILE_LAYERS: dict[PkkType, list[int]] = {
@@ -33,17 +32,13 @@ class TileServerNotResponsedError(Exception):
 
 def api_request(
     client: httpx.Client,
-    req_method: str, 
-    api_method: str, 
-    params: Optional[dict] = None, 
+    req_method: str,
+    api_method: str,
+    params: Optional[dict] = None,
     json: Optional[dict] = None
 ):
-    try:
-        r = client.request(req_method, API_HOST + api_method,
-                        params=params, json=json)
-    except httpx.TimeoutException:
-        sleep(1)
-        return api_request(client, req_method, api_method, params, json)
+    r = client.request(req_method, API_HOST + api_method,
+                    params=params, json=json)
     if r.status_code == 502:
         sleep(1)
         return api_request(client, req_method, api_method, params, json)
@@ -53,17 +48,14 @@ def api_request(
 
 async def async_api_request(
     client: httpx.AsyncClient,
-    req_method: str, 
-    api_method: str, 
-    params: Optional[dict] = None, 
+    req_method: str,
+    api_method: str,
+    params: Optional[dict] = None,
     json: Optional[dict] = None
 ):
-    try:
-        r = await client.request(req_method, API_HOST + api_method,
-                        params=params, json=json)
-    except httpx.TimeoutException:
-        await asyncio.sleep(1)
-        return await async_api_request(client, req_method, api_method, params, json)
+    # TODO: make httpx transport
+    r = await client.request(req_method, API_HOST + api_method,
+                    params=params, json=json)
     if r.status_code == 502:
         await asyncio.sleep(1)
         return await async_api_request(client, req_method, api_method, params, json)
