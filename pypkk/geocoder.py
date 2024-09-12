@@ -12,6 +12,11 @@ from .image import get_geometry
 tolerance = 4
 
 
+class NoCoordsFeatureError(Exception):
+    def __init__(self, feature: PkkSearchFeature):            
+        super().__init__(f"{feature.attrs.id} [{feature.type}] не имеет экстента")
+
+
 def search_at_point(lng: float, lat: float, types: Optional[list[PkkType]] = None) -> PkkAtPointResponse:
     params = {
         '_': round(time.time() * 1000),
@@ -52,6 +57,8 @@ async def async_get_attrs(cn: Cn) -> PkkFeatureResponse:
 
 
 async def async_get_geojson(feature: PkkSearchFeature) -> PkkGeojson:
+    if feature.extent is None:
+        raise NoCoordsFeatureError(feature)
     extents = generate_tile_extents(feature.extent)
     async with async_httpx_client() as client:
         tasks = [tile_request(client, feature, i) for i in extents]

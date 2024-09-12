@@ -1,5 +1,6 @@
 from contextlib import contextmanager, asynccontextmanager
 from typing import Optional
+import asyncio
 
 import httpx
 
@@ -50,12 +51,19 @@ def api_request(req_method: str, api_method: str, params: Optional[dict] = None,
         r = client.request(req_method, API_HOST + api_method,
                            params=params, json=json).raise_for_status()
         return r.json()
-    
-    
+
+
 async def async_api_request(req_method: str, api_method: str, params: Optional[dict] = None, json: Optional[dict] = None):
     async with async_httpx_client() as client:
-        r = await client.request(req_method, API_HOST + api_method,
-                           params=params, json=json)
+        try:
+            r = await client.request(req_method, API_HOST + api_method,
+                            params=params, json=json)
+        except httpx.TimeoutException:
+            await asyncio.sleep(1)
+            return await async_api_request(req_method, api_method, params, json)
+        if r.status_code == 502:
+            await asyncio.sleep(1)
+            return await async_api_request(req_method, api_method, params, json)
         r.raise_for_status()
         return r.json()
 
@@ -88,7 +96,7 @@ async def tile_request(client: httpx.AsyncClient, feature: PkkSearchFeature, til
     params = generate_tile_params(feature, tile_extent)
     try:
         r = await client.get(SELECTED_TILE_HOST, params=params)
-        r.raise_for_status()     
+        r.raise_for_status()
     except httpx.HTTPStatusError as e:
         tries_left -= 1
         # если 503 (varnish cache error) - при повторных попытках пройдет

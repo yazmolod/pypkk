@@ -20,6 +20,7 @@ TRANSFORM_3857_4326 = pyproj.Transformer.from_crs(
 class NoContoursError(Exception):
     pass
 
+
 def get_image_xy_corner(stream):
     """get сartesian coordinates from raster"""
     image_xy_corners = []
@@ -75,6 +76,7 @@ def get_image_geometry(tile_data: PkkTileResponse):
                 image_xy_corner[ig][icnt][ic] = [x, y]
     return to_geom(image_xy_corner)
 
+
 def get_geometry(tiles_data: list[PkkTileResponse]) -> MultiPolygon:
     geoms = []
     for i in tiles_data:
@@ -89,6 +91,7 @@ def get_geometry(tiles_data: list[PkkTileResponse]) -> MultiPolygon:
         return MultiPolygon([merged])
     return merged
 
+
 def to_geom(xy):
     polys = []
     for g in xy:
@@ -96,6 +99,7 @@ def to_geom(xy):
         holes = [LineString(i) for i in g[1:]] or None
         polys.append(Polygon(shell, holes))
     return make_valid(to_4326(MultiPolygon(polys)))
+
 
 def to_4326(geom: BaseGeometry):
     return transform(TRANSFORM_3857_4326, geom)

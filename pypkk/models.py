@@ -55,8 +55,8 @@ class PkkFeature(PkkSearchFeature):
 class PkkAtPointResponse(BaseModel):
     total: int
     results: list[PkkSearchFeature]
-    
-    
+
+
 class PkkSearchResponse(BaseModel):
     total: int
     features: list[PkkSearchFeature]
@@ -73,15 +73,15 @@ class PkkTileResponse(BaseModel):
     height: int
     extent: PkkExtent
     scale: float
-    
+
     model_config = ConfigDict(
         alias_generator=to_camel,
     )
-    
+
 class PkkGeojson(FeatureModel):
     geometry: MultiPolygonModel
     properties: PkkAttrs
-    
+
     @property
     def shapely_geometry(self):
         return shape(self.geometry.model_dump())
