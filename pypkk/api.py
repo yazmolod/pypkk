@@ -44,7 +44,10 @@ class PKK:
         return self
 
     def __exit__(self, *excinfo):
-        self._client.close()
+        try:
+            self._client.close()
+        except AssertionError:
+            pass
 
     def search_at_point(
         self,
@@ -102,7 +105,10 @@ class AsyncPKK:
         return self
 
     async def __aexit__(self, *excinfo):
-        await self._client.aclose()
+        try:
+            await self._client.aclose()
+        except AssertionError:
+            pass
 
     async def search_at_point(
         self,
