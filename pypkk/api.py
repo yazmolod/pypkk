@@ -82,7 +82,15 @@ class PKK:
         return PkkFeatureResponse.model_validate(r)
 
     def get_geojson(self, feature: PkkSearchFeature) -> PkkGeojson:
-        ...
+        if feature.extent is None:
+            raise NoCoordsFeatureError(feature)
+        extents = generate_tile_extents(feature.extent)
+        tiles_responses = []
+        for i in extents:
+            tile_response = tile_request(self._client, feature, i)
+            tiles_responses.append(tile_response)
+        geom = extract_geometry_from_tiles(tiles_responses)
+        return PkkGeojson(geometry=mapping(geom), properties=feature.attrs)
 
 
 class AsyncPKK:
@@ -146,7 +154,9 @@ class AsyncPKK:
         if feature.extent is None:
             raise NoCoordsFeatureError(feature)
         extents = generate_tile_extents(feature.extent)
-        tasks = [async_tile_request(self._client, feature, i) for i in extents]
-        tiles_responses = await asyncio.gather(*tasks)
+        tiles_responses = []
+        for i in extents:
+            tile_response = await async_tile_request(self._client, feature, i)
+            tiles_responses.append(tile_response)
         geom = extract_geometry_from_tiles(tiles_responses)
         return PkkGeojson(geometry=mapping(geom), properties=feature.attrs)

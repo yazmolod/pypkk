@@ -13,11 +13,12 @@ SELECTED_TILE_HOST = 'https://pkk.rosreestr.ru/arcgis/rest/services/PKK6/Cadastr
 CLIENT_ARGS = {
     "headers": {
         'pragma': 'no-cache',
+        'origin': 'https://pkk.rosreestr.ru/',
         'referer': 'https://pkk.rosreestr.ru/',
         'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36',
         'x-requested-with': 'XMLHttpRequest',
     },
-    "timeout": 10,
+    "timeout": 30,
 }
 
 TILE_LAYERS: dict[PkkType, list[int]] = {
@@ -92,24 +93,18 @@ async def async_tile_request(client: httpx.AsyncClient, feature: PkkSearchFeatur
     try:
         r = await client.get(SELECTED_TILE_HOST, params=params)
         r.raise_for_status()
-    except httpx.HTTPStatusError as e:
-        tries_left -= 1
-        # если 503 (varnish cache error) - при повторных попытках пройдет
-        if e.response.status_code >= 500:
-            return await async_tile_request(client, feature, tile_extent, tries_left=tries_left)
-        # если 400 - ошибка layerDefs от ПКК, но это неправда. Лечится незначительным изменением bbox
-        elif e.response.status_code == 400:
-            tile_extent.xmin -= 0.001
-            tile_extent.xmax += 0.001
-            tile_extent.ymin -= 0.001
-            tile_extent.ymax += 0.001
-            return await async_tile_request(client, feature, tile_extent, tries_left=tries_left)
-        else:
-            raise e
-    except httpx.TimeoutException:
-        tries_left -= 1
-        return await async_tile_request(client, feature, tile_extent, tries_left=tries_left)
-    except httpx.NetworkError:
+    except (httpx.HTTPStatusError, httpx.TimeoutException, httpx.NetworkError) as e:
+        if isinstance(e, httpx.HTTPStatusError):
+            # если 400 - ошибка layerDefs от ПКК, но это неправда. Лечится незначительным изменением bbox
+            if e.response.status_code == 400:
+                tile_extent.xmin -= 0.001
+                tile_extent.xmax += 0.001
+                tile_extent.ymin -= 0.001
+                tile_extent.ymax += 0.001
+                return await async_tile_request(client, feature, tile_extent, tries_left=tries_left)
+            elif e.response.status_code < 500:
+                raise e
+        await asyncio.sleep(1)
         tries_left -= 1
         return await async_tile_request(client, feature, tile_extent, tries_left=tries_left)
     return PkkTileResponse.model_validate(r.json())
@@ -122,24 +117,18 @@ def tile_request(client: httpx.Client, feature: PkkSearchFeature, tile_extent: P
     try:
         r = client.get(SELECTED_TILE_HOST, params=params)
         r.raise_for_status()
-    except httpx.HTTPStatusError as e:
-        tries_left -= 1
-        # если 503 (varnish cache error) - при повторных попытках пройдет
-        if e.response.status_code >= 500:
-            return tile_request(client, feature, tile_extent, tries_left=tries_left)
-        # если 400 - ошибка layerDefs от ПКК, но это неправда. Лечится незначительным изменением bbox
-        elif e.response.status_code == 400:
-            tile_extent.xmin -= 0.001
-            tile_extent.xmax += 0.001
-            tile_extent.ymin -= 0.001
-            tile_extent.ymax += 0.001
-            return tile_request(client, feature, tile_extent, tries_left=tries_left)
-        else:
-            raise e
-    except httpx.TimeoutException:
-        tries_left -= 1
-        return tile_request(client, feature, tile_extent, tries_left=tries_left)
-    except httpx.NetworkError:
+    except (httpx.HTTPStatusError, httpx.TimeoutException, httpx.NetworkError) as e:
+        if isinstance(e, httpx.HTTPStatusError):
+            # если 400 - ошибка layerDefs от ПКК, но это неправда. Лечится незначительным изменением bbox
+            if e.response.status_code == 400:
+                tile_extent.xmin -= 0.001
+                tile_extent.xmax += 0.001
+                tile_extent.ymin -= 0.001
+                tile_extent.ymax += 0.001
+                return tile_request(client, feature, tile_extent, tries_left=tries_left)
+            elif e.response.status_code < 500:
+                raise e
+        sleep(1)
         tries_left -= 1
         return tile_request(client, feature, tile_extent, tries_left=tries_left)
     return PkkTileResponse.model_validate(r.json())
