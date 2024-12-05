@@ -11,7 +11,7 @@ authors = [
     { name = "Aleksandr Litovchenko", email = "yazmolod@gmail.com" },
 ]
 dependencies = [
-    "hishel",
+    "hishel[sqlite]",
     "pydantic",
     "pydantic-geojson",
     "opencv-python",
@@ -28,4 +28,20 @@ path = "pypkk/__version__.py"
 include = [
     "/README.md",
     "/tests",
+]
+
+[dependency-groups]
+dev = [
+    "pytest-asyncio>=0.24.0",
+    "pytest>=8.3.4",
+]
+ipy = [
+    "ipykernel>=6.29.5",
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
 ]

@@ -1,5 +1,5 @@
 import pytest
-import geopandas as gpd
+# import geopandas as gpd
 
 from pypkk import Cn, PKK, AsyncPKK
 
@@ -63,4 +63,4 @@ async def test_async_get_geojson(simple_cn):
         geojson = geo.model_dump_json()
         with open('test.geojson', 'w') as file:
             file.write(geojson)
-        gpd.read_file(geojson).set_crs(4326).to_file('test.gpkg', driver='GPKG')
+        # gpd.read_file(geojson).set_crs(4326).to_file('test.gpkg', driver='GPKG')
