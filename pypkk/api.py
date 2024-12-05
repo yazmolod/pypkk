@@ -6,7 +6,7 @@ import httpx
 import hishel
 from shapely.geometry import mapping
 
-from .requests import api_request, async_api_request, tile_request, async_tile_request, CLIENT_ARGS
+from .requests import api_request, async_api_request, tile_request, async_tile_request, CLIENT_ARGS, SSL_CONTEXT
 from .models import Cn, PkkType, PkkAtPointResponse, PkkFeature, PkkFeatureResponse, PkkSearchFeature, PkkGeojson
 from .tile_utils import generate_tile_extents
 from .image import extract_geometry_from_tiles
@@ -34,7 +34,7 @@ class PKK:
         match cache_type:
             case 'sqlite':
                 transport = hishel.CacheTransport(
-                    transport=httpx.HTTPTransport(verify=False),
+                    transport=httpx.HTTPTransport(verify=SSL_CONTEXT),
                     storage=hishel.SQLiteStorage(ttl=cache_ttl),
                     controller=_hishel_controller,
                 )
@@ -103,7 +103,7 @@ class AsyncPKK:
         match cache_type:
             case 'sqlite':
                 transport = hishel.AsyncCacheTransport(
-                    transport=httpx.AsyncHTTPTransport(verify=False),
+                    transport=httpx.AsyncHTTPTransport(verify=SSL_CONTEXT),
                     storage=hishel.AsyncSQLiteStorage(ttl=cache_ttl),
                     controller=_hishel_controller,
                 )

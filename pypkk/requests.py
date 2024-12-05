@@ -1,6 +1,7 @@
 from typing import Optional
 import asyncio
 from time import sleep
+import ssl
 
 import httpx
 
@@ -20,6 +21,9 @@ CLIENT_ARGS = {
     },
     "timeout": 30,
 }
+
+SSL_CONTEXT = ssl._create_unverified_context()
+SSL_CONTEXT.set_ciphers("ALL:@SECLEVEL=1")
 
 TILE_LAYERS: dict[PkkType, list[int]] = {
     1: [6, 7, 8, 9],
