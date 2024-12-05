@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pypkk"
-description = "The next generation HTTP client."
+description = "PKK parser"
 license = "BSD-3-Clause"
 requires-python = ">=3.10"
 authors = [
     { name = "Aleksandr Litovchenko", email = "yazmolod@gmail.com" },
 ]
 dependencies = [
-    "httpx",
+    "hishel",
     "pydantic",
     "pydantic-geojson",
     "opencv-python",
@@ -26,7 +26,6 @@ path = "pypkk/__version__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "/httpx",
     "/README.md",
     "/tests",
 ]
