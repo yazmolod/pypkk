@@ -1,7 +1,9 @@
 import pytest
 # import geopandas as gpd
 
-from pypkk import Cn, PKK, AsyncPKK
+from pypkk import PKK, AsyncPKK
+from pypkk.schemas.inputs import Cn
+from pypkk.schemas.features import ZuGeojson, OksGeojson
 
 
 @pytest.fixture
@@ -61,6 +63,20 @@ async def test_async_get_geojson(simple_cn):
         geo = await api.get_geojson(data.feature)
         assert geo is not None
         geojson = geo.model_dump_json()
-        with open('test.geojson', 'w') as file:
-            file.write(geojson)
+        # with open('test.geojson', 'w') as file:
+        #     file.write(geojson)
         # gpd.read_file(geojson).set_crs(4326).to_file('test.gpkg', driver='GPKG')
+        
+@pytest.mark.asyncio
+async def test_async_get_zu_geojson():
+    async with AsyncPKK() as api:
+        feat = await api.find_zu_geojson('77:01:0001078:3271')
+        assert isinstance(feat, ZuGeojson)
+        assert not feat.shapely_geometry.is_empty
+    
+@pytest.mark.asyncio
+async def test_async_get_oks_geojson():
+    async with AsyncPKK() as api:
+        feat = await api.find_oks_geojson('77:01:0001078:1086')
+        assert isinstance(feat, OksGeojson)
+        assert not feat.shapely_geometry.is_empty

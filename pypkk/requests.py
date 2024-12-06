@@ -5,8 +5,12 @@ import ssl
 
 import httpx
 
-from .models import PkkExtent, PkkType, PkkSearchFeature, PkkTileResponse
-from .tile_utils import DEFAULT_SCALE, PKK_MAX_TILE_SIZE
+from pypkk.schemas.coords import PkkExtent
+
+from pypkk.schemas.responses import PkkTileResponse
+
+from pypkk.schemas.features import PkkType, PkkSearchFeature
+from pypkk.tile_utils import DEFAULT_SCALE, PKK_MAX_TILE_SIZE
 
 API_HOST = 'https://pkk.rosreestr.ru/api'
 SELECTED_TILE_HOST = 'https://pkk.rosreestr.ru/arcgis/rest/services/PKK6/CadastreSelected/MapServer/export'

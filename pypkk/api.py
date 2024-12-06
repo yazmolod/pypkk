@@ -6,10 +6,14 @@ import httpx
 import hishel
 from shapely.geometry import mapping
 
-from .requests import api_request, async_api_request, tile_request, async_tile_request, CLIENT_ARGS, SSL_CONTEXT
-from .models import Cn, PkkType, PkkAtPointResponse, PkkFeature, PkkFeatureResponse, PkkSearchFeature, PkkGeojson
-from .tile_utils import generate_tile_extents
-from .image import extract_geometry_from_tiles
+from pypkk.schemas.inputs import Cn
+
+from pypkk.schemas.responses import PkkAtPointResponse, PkkFeatureResponse
+
+from pypkk.requests import api_request, async_api_request, tile_request, async_tile_request, CLIENT_ARGS, SSL_CONTEXT
+from pypkk.schemas.features import PkkGeojson, PkkType, PkkFeature, PkkSearchFeature, ZuGeojson, OksGeojson
+from pypkk.tile_utils import generate_tile_extents
+from pypkk.image import extract_geometry_from_tiles
 
 
 tolerance = 4
@@ -159,4 +163,26 @@ class AsyncPKK:
             tile_response = await async_tile_request(self._client, feature, i)
             tiles_responses.append(tile_response)
         geom = extract_geometry_from_tiles(tiles_responses)
-        return PkkGeojson(geometry=mapping(geom), properties=feature.attrs)
+        return PkkGeojson(geometry=mapping(geom), properties=feature.attrs.model_dump_extra())
+    
+    async def find_geojson(self, cn: Cn) -> Optional[PkkGeojson]:
+        resp = await self.get_attrs(cn)
+        feature = resp.feature
+        if feature is None:
+            return None
+        if feature.extent is None:
+            return None
+        geojson = await self.get_geojson(feature)
+        return geojson
+    
+    async def find_zu_geojson(self, code: str) -> Optional[ZuGeojson]:
+        geojson = await self.find_geojson(Cn.zu(code))
+        if geojson is None:
+            return None
+        return ZuGeojson(geometry=geojson.geometry, properties=geojson.properties.model_dump_extra())
+    
+    async def find_oks_geojson(self, code: str) -> Optional[OksGeojson]:
+        geojson = await self.find_geojson(Cn.oks(code))
+        if geojson is None:
+            return None
+        return OksGeojson(geometry=geojson.geometry, properties=geojson.properties.model_dump_extra())

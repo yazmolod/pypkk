@@ -8,8 +8,8 @@ from shapely.geometry import LineString, Polygon, MultiPolygon
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
-from .models import PkkTileResponse
-from .geom_utils import to_4326
+from pypkk.schemas.responses import PkkTileResponse
+from pypkk.geom_utils import to_4326
 
 
 class NoContoursError(Exception):

@@ -1,2 +1,2 @@
 from .api import PKK, AsyncPKK
-from .models import Cn
+from .schemas.inputs import Cn

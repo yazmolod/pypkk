@@ -11,6 +11,16 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Python Debugger: Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/test_geocoder.py",
+            "console": "integratedTerminal",
+            "purpose": ["debug-test"],
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false,
         }
     ]
 }

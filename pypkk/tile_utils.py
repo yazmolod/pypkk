@@ -1,5 +1,5 @@
 from typing import Optional
-from .models import PkkExtent
+from pypkk.schemas.coords import PkkExtent
 
 
 # ~scale=375 в ответе с пкк; достаточный масштаб для определение выступа контура меньше метра
