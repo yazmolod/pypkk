@@ -1,24 +1,32 @@
-from typing import Literal, Annotated, Optional, Any
+from typing import Annotated, Any, Literal, Optional
 
-from pydantic import BaseModel, StringConstraints, ConfigDict, Base64Bytes
+from pydantic import Base64Bytes, BaseModel, ConfigDict, StringConstraints
 from pydantic.alias_generators import to_camel
 from pydantic_geojson import FeatureModel, MultiPolygonModel
-from shapely.geometry import shape, Point
+from shapely.geometry import Point, shape
 
 from .geom_utils import to_4326
-
 
 PkkType = Literal[1, 5]
 
 
 class Cn(BaseModel):
-    code: Annotated[str, StringConstraints(
-        strip_whitespace=True, pattern=r'\d+:\d+:\d+:\d+')]
+    code: Annotated[
+        str, StringConstraints(strip_whitespace=True, pattern=r"\d+:\d+:\d+:\d+")
+    ]
     kind: PkkType
 
     @property
     def clean_code(self):
-        return ':'.join(map(str, map(int, self.code.split(':'))))
+        return ":".join(map(str, map(int, self.code.split(":"))))
+
+    @classmethod
+    def zu(cls, code: str):
+        return cls(code=code, kind=1)
+
+    @classmethod
+    def oks(cls, code: str):
+        return cls(code=code, kind=5)
 
 
 class PkkCenter(BaseModel):
@@ -36,9 +44,7 @@ class PkkExtent(BaseModel):
 class PkkAttrs(BaseModel):
     id: str
 
-    model_config = ConfigDict(
-        extra='allow'
-    )
+    model_config = ConfigDict(extra="allow")
 
 
 class PkkSearchFeature(BaseModel):
@@ -47,7 +53,7 @@ class PkkSearchFeature(BaseModel):
     type: PkkType
     center: Optional[PkkCenter] = None
     extent: Optional[PkkExtent] = None
-    
+
     @property
     def shapely_geometry(self):
         if self.center is None:
@@ -69,11 +75,12 @@ class PkkAtPointResponse(BaseModel):
 class PkkSearchResponse(BaseModel):
     total: int
     features: list[PkkSearchFeature]
-    total_relation: Literal['eq', 'gte']
+    total_relation: Literal["eq", "gte"]
 
 
 class PkkFeatureResponse(BaseModel):
     feature: Optional[PkkFeature] = None
+
 
 class PkkTileResponse(BaseModel):
     image_data: Base64Bytes
@@ -86,6 +93,7 @@ class PkkTileResponse(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
     )
+
 
 class PkkGeojson(FeatureModel):
     geometry: MultiPolygonModel
