@@ -4,10 +4,9 @@ from pydantic import BaseModel
 from pydantic_geojson import FeatureModel, MultiPolygonModel
 from shapely.geometry import MultiPolygon, Point, shape
 
-from pypkk.schemas.attrs import SearchAttrs, OksAttrs, ZuAttrs, CommonAttrs
-from pypkk.schemas.coords import PkkCenter, PkkExtent
-
 from pypkk.geom_utils import to_4326
+from pypkk.schemas.attrs import CommonAttrs, OksAttrs, SearchAttrs, ZuAttrs
+from pypkk.schemas.coords import PkkCenter, PkkExtent
 
 PkkType = Literal[1, 5]
 
@@ -31,10 +30,12 @@ class PkkFeature(PkkSearchFeature):
     stat: Optional[dict] = {}
     extent_parent: Optional[PkkExtent] = None
 
+
 class ZuFeature(PkkFeature):
     type: Literal[1]
     attrs: ZuAttrs
-    
+
+
 class OksFeature(PkkFeature):
     type: Literal[5]
     attrs: OksAttrs
@@ -48,8 +49,10 @@ class PkkGeojson(FeatureModel):
     def shapely_geometry(self) -> MultiPolygon:
         return shape(self.geometry.model_dump())
 
+
 class ZuGeojson(PkkGeojson):
     properties: ZuAttrs
-    
+
+
 class OksGeojson(PkkGeojson):
     properties: OksAttrs

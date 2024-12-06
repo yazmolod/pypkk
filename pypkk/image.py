@@ -3,13 +3,12 @@ from typing import Optional
 
 import cv2
 import numpy as np
-from shapely.geometry import LineString, Polygon, MultiPolygon
-
+from shapely.geometry import LineString, MultiPolygon, Polygon
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
-from pypkk.schemas.responses import PkkTileResponse
 from pypkk.geom_utils import to_4326
+from pypkk.schemas.responses import PkkTileResponse
 
 
 class NoContoursError(Exception):
@@ -51,7 +50,7 @@ def _get_image_xy_corner(stream: BytesIO):
             index = fry if parent_index < 0 else parent_index
             hierarchy_contours[index].append(cc)
     image_xy_corners = [c for c in hierarchy_contours if len(c) > 0]
-    if len(image_xy_corners)  == 0:
+    if len(image_xy_corners) == 0:
         return None
     return image_xy_corners
 

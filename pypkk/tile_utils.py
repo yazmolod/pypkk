@@ -1,6 +1,6 @@
 from typing import Optional
-from pypkk.schemas.coords import PkkExtent
 
+from pypkk.schemas.coords import PkkExtent
 
 # ~scale=375 в ответе с пкк; достаточный масштаб для определение выступа контура меньше метра
 DEFAULT_SCALE = 10
@@ -21,7 +21,8 @@ API_TIMEOUT = 1000
 def generate_tile_extents(
     extent: PkkExtent,
     custom_extent: Optional[PkkExtent] = None,
-    scale: Optional[int] = None) -> list[PkkExtent]:
+    scale: Optional[int] = None,
+) -> list[PkkExtent]:
     # if custom_extent is not None:
     #     input_extent.xmin = max([input_extent.xmin, custom_extent.xmin])
     #     input_extent.ymin = max([input_extent.ymin, custom_extent.ymin])
@@ -32,20 +33,28 @@ def generate_tile_extents(
     extents: list[PkkExtent] = []
     cymin = extent.ymin
     while cymin < extent.ymax:
-        yoffset = extent.ymax - cymin if cymin + \
-            max_tile_size > extent.ymax else max_tile_size
+        yoffset = (
+            extent.ymax - cymin
+            if cymin + max_tile_size > extent.ymax
+            else max_tile_size
+        )
         cymax = cymin + yoffset
         cxmin = extent.xmin
         while cxmin < extent.xmax:
-            xoffset = extent.xmax - cxmin if cxmin + \
-                max_tile_size > extent.xmax else max_tile_size
+            xoffset = (
+                extent.xmax - cxmin
+                if cxmin + max_tile_size > extent.xmax
+                else max_tile_size
+            )
             cxmax = cxmin + xoffset
-            extents.append(PkkExtent(
-                xmin=cxmin - TILE_BUFFER,
-                xmax=cxmax + TILE_BUFFER,
-                ymin=cymin - TILE_BUFFER,
-                ymax=cymax + TILE_BUFFER,
-            ))
+            extents.append(
+                PkkExtent(
+                    xmin=cxmin - TILE_BUFFER,
+                    xmax=cxmax + TILE_BUFFER,
+                    ymin=cymin - TILE_BUFFER,
+                    ymax=cymax + TILE_BUFFER,
+                )
+            )
             cxmin += xoffset
         cymin += max_tile_size
     # если экстентов слишком много при таком масштабе - уменьшаем

@@ -1,7 +1,8 @@
-from pydantic import BaseModel, StringConstraints
-from pypkk.schemas.features import PkkType
-
 from typing import Annotated
+
+from pydantic import BaseModel, StringConstraints
+
+from pypkk.schemas.features import PkkType
 
 
 class Cn(BaseModel):

@@ -4,16 +4,13 @@ import pyproj
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform
 
-
 T = TypeVar("T", bound=BaseGeometry)
 
 
-EPSG_3857 = pyproj.CRS('epsg:3857')
-EPSG_4326 = pyproj.CRS('epsg:4326')
+EPSG_3857 = pyproj.CRS("epsg:3857")
+EPSG_4326 = pyproj.CRS("epsg:4326")
 TRANSFORM_3857_4326 = pyproj.Transformer.from_crs(
-    EPSG_3857,
-    EPSG_4326,
-    always_xy=True
+    EPSG_3857, EPSG_4326, always_xy=True
 ).transform
 
 
