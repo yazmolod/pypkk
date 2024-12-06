@@ -14,10 +14,10 @@ dependencies = [
     "hishel[sqlite]",
     "pydantic",
     "pydantic-geojson",
-    "opencv-python",
     "shapely",
     "pyproj",
     "numpy",
+    "opencv-contrib-python-headless>=4.10.0.84",
 ]
 dynamic = ["readme", "version"]
 
