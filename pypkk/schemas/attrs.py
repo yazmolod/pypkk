@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SearchAttrs(BaseModel):
@@ -11,14 +11,19 @@ class SearchAttrs(BaseModel):
 
 
 class CommonAttrs(SearchAttrs):
-    cad_cost: float
-    area_value: float
-    address: str
+    cad_cost: float = Field(description="Кадастровая стоимость")
+    area_value: float = Field(description="Площадь общая")
+    address: str = Field(description="Адрес")
+    fp: int = Field(description="Форма собственности (код)")
 
 
 class ZuAttrs(CommonAttrs):
-    util_by_doc: str
+    util_by_doc: str = Field(description="Разрешенное использование")
 
 
 class OksAttrs(CommonAttrs):
-    floors: int
+    floors: int = Field(description="Количество этажей (в том числе подземных)")
+    undeground_floors: int = Field(description="Количество подземных этажей")
+    name: str = Field(description="Наименование")
+    year_built: int = Field(description="Завершение строительства")
+    year_used: int = Field(description="Ввод в эксплуатацию")
