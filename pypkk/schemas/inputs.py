@@ -1,5 +1,5 @@
 import re
-from typing import Annotated, Iterable, Literal, Optional
+from typing import Annotated, Generator, Literal, Optional
 
 from pydantic import BaseModel, StringConstraints
 from typing_extensions import Self
@@ -30,7 +30,7 @@ class Cn(BaseModel):
         return OksCn(code=code)
 
     @staticmethod
-    def iter_cns(cns_string: str) -> Iterable[str]:
+    def iter_cns(cns_string: str) -> Generator[str, None, None]:
         for i in re.findall(r"\d+:\d+:\d+:\d+", cns_string):
             yield i
 

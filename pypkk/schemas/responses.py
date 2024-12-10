@@ -4,7 +4,7 @@ from pydantic import Base64Bytes, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
 from pypkk.schemas.coords import PkkExtent
-from pypkk.schemas.features import PkkFeature, PkkSearchFeature
+from pypkk.schemas.features import OksFeature, PkkSearchFeature, ZuFeature
 
 
 class PkkAtPointResponse(BaseModel):
@@ -19,7 +19,7 @@ class PkkSearchResponse(BaseModel):
 
 
 class PkkFeatureResponse(BaseModel):
-    feature: Optional[PkkFeature] = None
+    feature: Optional[ZuFeature | OksFeature] = None
 
 
 class PkkTileResponse(BaseModel):

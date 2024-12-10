@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -11,19 +13,21 @@ class SearchAttrs(BaseModel):
 
 
 class CommonAttrs(SearchAttrs):
-    cad_cost: float = Field(description="Кадастровая стоимость")
-    area_value: float = Field(description="Площадь общая")
-    address: str = Field(description="Адрес")
-    fp: int = Field(description="Форма собственности (код)")
+    cad_cost: Optional[float] = Field(description="Кадастровая стоимость")
+    area_value: Optional[float] = Field(description="Площадь общая")
+    address: Optional[str] = Field(description="Адрес")
+    fp: Optional[int] = Field(description="Форма собственности (код)")
 
 
 class ZuAttrs(CommonAttrs):
-    util_by_doc: str = Field(description="Разрешенное использование")
+    util_by_doc: Optional[str] = Field(description="Разрешенное использование")
 
 
 class OksAttrs(CommonAttrs):
-    floors: int = Field(description="Количество этажей (в том числе подземных)")
-    undeground_floors: int = Field(description="Количество подземных этажей")
-    name: str = Field(description="Наименование")
-    year_built: int = Field(description="Завершение строительства")
-    year_used: int = Field(description="Ввод в эксплуатацию")
+    floors: Optional[int] = Field(
+        description="Количество этажей (в том числе подземных)"
+    )
+    underground_floors: Optional[int] = Field(description="Количество подземных этажей")
+    name: Optional[str] = Field(description="Наименование")
+    year_built: Optional[int] = Field(description="Завершение строительства")
+    year_used: Optional[int] = Field(description="Ввод в эксплуатацию")
