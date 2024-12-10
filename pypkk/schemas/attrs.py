@@ -16,9 +16,9 @@ class CommonAttrs(SearchAttrs):
     area_value: float
 
 
-class ZuAttrs(SearchAttrs):
+class ZuAttrs(CommonAttrs):
     util_by_doc: str
 
 
-class OksAttrs(SearchAttrs):
+class OksAttrs(CommonAttrs):
     floors: int
