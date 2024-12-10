@@ -97,18 +97,15 @@ async def test_async_get_oks_geojson():
 
 @pytest.mark.asyncio
 async def test_async_gather_requests():
-    cns = [
-        "77:03:0001007:28",
-        "77:03:0001007:36",
-        "77:03:0001007:32",
-    ]
+    cns_string = "77:03:0001007:28, 77:03:0001007:36, 77:03:0001007:32"
+    cns = Cn.zu_array(cns_string)
     async with AsyncPKK(use_lock=True) as api:
         start_time = time()
-        tasks = list(map(lambda x: api.get_attrs(Cn.zu(x)), cns))
-        await asyncio.gather(*tasks)
+        res = await asyncio.gather(*map(api.get_attrs, cns))
+        assert all([i.feature is not None for i in res])
         non_cache_time = time()
-        tasks = list(map(lambda x: api.get_attrs(Cn.zu(x)), cns))
-        await asyncio.gather(*tasks)
+        res = await asyncio.gather(*map(api.get_attrs, cns))
+        assert all([i.feature is not None for i in res])
         cache_time = time()
         assert non_cache_time - start_time > 3
         assert cache_time - non_cache_time < 1
