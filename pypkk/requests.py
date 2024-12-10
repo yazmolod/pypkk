@@ -37,6 +37,13 @@ class TileServerNotResponsedError(Exception):
     pass
 
 
+def time_to_sleep(r: httpx.Response):
+    mcs = 1_000_000 - r.elapsed.microseconds
+    if mcs <= 0:
+        return 0
+    return round(mcs / 10**6, 1)
+
+
 def api_request(
     client: httpx.Client,
     req_method: str,
@@ -45,8 +52,9 @@ def api_request(
     json: Optional[dict] = None,
 ):
     r = client.request(req_method, API_HOST + api_method, params=params, json=json)
+    if not r.extensions["from_cache"]:
+        sleep(time_to_sleep(r))
     if r.status_code == 502:
-        sleep(1)
         return api_request(client, req_method, api_method, params, json)
     r.raise_for_status()
     return r.json()
@@ -58,14 +66,21 @@ async def async_api_request(
     api_method: str,
     params: Optional[dict] = None,
     json: Optional[dict] = None,
+    lock: Optional[asyncio.Lock] = None,
 ):
-    # TODO: make httpx transport
+    if lock is not None:
+        await lock.acquire()
     r = await client.request(
         req_method, API_HOST + api_method, params=params, json=json
     )
+    if lock is not None:
+        if not r.extensions["from_cache"]:
+            await asyncio.sleep(time_to_sleep(r))
+        lock.release()
     if r.status_code == 502:
-        await asyncio.sleep(1)
-        return await async_api_request(client, req_method, api_method, params, json)
+        return await async_api_request(
+            client, req_method, api_method, params, json, lock
+        )
     r.raise_for_status()
     return r.json()
 

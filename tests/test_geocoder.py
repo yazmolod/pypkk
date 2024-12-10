@@ -1,9 +1,20 @@
+import asyncio
+from pathlib import Path
+from time import time
+
 import pytest
 
 # import geopandas as gpd
 from pypkk import PKK, AsyncPKK
 from pypkk.schemas.features import OksGeojson, ZuGeojson
 from pypkk.schemas.inputs import Cn
+
+
+@pytest.fixture(scope="session", autouse=True)
+def delete_cache():
+    file = Path(__file__).parent.parent / ".hishel.sqlite"
+    if file.exists():
+        file.unlink()
 
 
 @pytest.fixture
@@ -82,3 +93,22 @@ async def test_async_get_oks_geojson():
         feat = await api.find_oks_geojson("77:01:0001078:1086")
         assert isinstance(feat, OksGeojson)
         assert not feat.shapely_geometry.is_empty
+
+
+@pytest.mark.asyncio
+async def test_async_gather_requests():
+    cns = [
+        "77:03:0001007:28",
+        "77:03:0001007:36",
+        "77:03:0001007:32",
+    ]
+    async with AsyncPKK(use_lock=True) as api:
+        start_time = time()
+        tasks = list(map(lambda x: api.get_attrs(Cn.zu(x)), cns))
+        await asyncio.gather(*tasks)
+        non_cache_time = time()
+        tasks = list(map(lambda x: api.get_attrs(Cn.zu(x)), cns))
+        await asyncio.gather(*tasks)
+        cache_time = time()
+        assert non_cache_time - start_time > 3
+        assert cache_time - non_cache_time < 1

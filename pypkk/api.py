@@ -1,3 +1,4 @@
+import asyncio
 from typing import Literal, Optional
 
 import hishel
@@ -104,6 +105,7 @@ class AsyncPKK:
         self,
         cache_type: Optional[Literal["sqlite"]] = "sqlite",
         cache_ttl: int = 24 * 60 * 60,
+        use_lock: bool = True,
     ):
         transport = None
         match cache_type:
@@ -114,6 +116,7 @@ class AsyncPKK:
                     controller=_hishel_controller,
                 )
         self._client = httpx.AsyncClient(**CLIENT_ARGS, transport=transport)
+        self.lock = asyncio.Lock() if use_lock else None
 
     async def __aenter__(self):
         return self
@@ -133,7 +136,9 @@ class AsyncPKK:
         }
         if types is not None:
             params["types"] = types
-        r = await async_api_request(self._client, "get", "/features/", params=params)
+        r = await async_api_request(
+            self._client, "get", "/features/", params=params, lock=self.lock
+        )
         return PkkAtPointResponse.model_validate(r)
 
     async def search(self, cn: Cn): ...
@@ -145,7 +150,11 @@ class AsyncPKK:
             "date_format": r"%c",
         }
         r = await async_api_request(
-            self._client, "get", f"/features/{cn.kind}/{cn.clean_code}", params
+            self._client,
+            "get",
+            f"/features/{cn.kind}/{cn.clean_code}",
+            params=params,
+            lock=self.lock,
         )
         return PkkFeatureResponse.model_validate(r)
 
