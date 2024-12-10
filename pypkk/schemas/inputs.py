@@ -1,5 +1,5 @@
 import re
-from typing import Annotated, Iterable, Optional
+from typing import Annotated, Iterable, Literal, Optional
 
 from pydantic import BaseModel, StringConstraints
 from typing_extensions import Self
@@ -17,13 +17,17 @@ class Cn(BaseModel):
     def clean_code(self) -> str:
         return ":".join(map(str, map(int, self.code.split(":"))))
 
-    @classmethod
-    def zu(cls, code: str) -> Self:
-        return cls(code=code, kind=1)
+    @staticmethod
+    def zu(code: str) -> "ZuCn":
+        return ZuCn(code=code)
 
-    @classmethod
-    def oks(cls, code: str) -> Self:
-        return cls(code=code, kind=5)
+    @staticmethod
+    def kvartal(code: str) -> "KvartalCn":
+        return KvartalCn(code=code)
+
+    @staticmethod
+    def oks(code: str) -> "OksCn":
+        return OksCn(code=code)
 
     @staticmethod
     def iter_cns(cns_string: str) -> Iterable[str]:
@@ -31,11 +35,33 @@ class Cn(BaseModel):
             yield i
 
     @classmethod
-    def zu_array(cls, cns_string: str) -> Optional[list[Self]]:
-        cns = [cls(code=i, kind=1) for i in cls.iter_cns(cns_string)]
+    def _cn_array(cls, cns_string: str, kind: PkkType) -> Optional[list[Self]]:
+        cns = [cls(code=i, kind=kind) for i in cls.iter_cns(cns_string)]
         return cns if len(cns) > 0 else None
 
     @classmethod
-    def oks_array(cls, cns_string: str) -> Optional[list[Self]]:
-        cns = [cls(code=i, kind=5) for i in cls.iter_cns(cns_string)]
-        return cns if len(cns) > 0 else None
+    def zu_array(cls, cns_string: str) -> Optional[list["ZuCn"]]:
+        return cls._cn_array(cns_string, kind=1)
+
+    @classmethod
+    def kvartal_array(cls, cns_string: str) -> Optional[list["KvartalCn"]]:
+        return cls._cn_array(cns_string, kind=2)
+
+    @classmethod
+    def oks_array(cls, cns_string: str) -> Optional[list["OksCn"]]:
+        return cls._cn_array(cns_string, kind=5)
+
+
+class ZuCn(Cn):
+    kind: Literal[1] = 1
+
+
+class OksCn(Cn):
+    kind: Literal[5] = 5
+
+
+class KvartalCn(Cn):
+    code: Annotated[
+        str, StringConstraints(strip_whitespace=True, pattern=r"\d+:\d+:\d+")
+    ]
+    kind: Literal[2] = 2

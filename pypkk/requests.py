@@ -29,6 +29,7 @@ SSL_CONTEXT.set_ciphers("ALL:@SECLEVEL=1")
 
 TILE_LAYERS: dict[PkkType, list[int]] = {
     1: [6, 7, 8, 9],
+    2: [10, 11, 12],
     5: [0, 1, 2, 3, 4, 5],
 }
 
